@@ -67,9 +67,7 @@ public class PlayerWordSpeller : MonoBehaviour
 
     void LateUpdate()
     {
-        // Chữ nằm ngang theo map, nhìn từ trên xuống
-        if (headDisplayGO != null)
-            headDisplayGO.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
+        headDisplayGO.transform.rotation = Quaternion.identity;
     }
 
     void Update()
@@ -99,12 +97,13 @@ public class PlayerWordSpeller : MonoBehaviour
         int len = targetWord.Length;
         float totalWidth = (len - 1) * letterSpacing;
         float startX = -totalWidth / 2f;
-
+	
         for (int i = 0; i < len; i++)
         {
             var go = new GameObject("L_" + i);
             go.transform.SetParent(headDisplayGO.transform);
             go.transform.localPosition = new Vector3(startX + i * letterSpacing, 0, 0);
+		go.transform.localRotation = Quaternion.Euler(50f, 0f, 0f);
             go.transform.localScale = Vector3.one * 0.25f;
 
             var tm = go.AddComponent<TextMesh>();
