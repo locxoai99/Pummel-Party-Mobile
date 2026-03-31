@@ -1,4 +1,4 @@
-#if UNITY_EDITOR1
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Animations;
