@@ -10,8 +10,8 @@ public class KeyboardMap : MonoBehaviour
     public float tileHeight = 0.02f;  // thấp hơn (was 0.35)
     public float tileSpacing = 0.6f;   // khoảng cách hẹp hơn (was 1.4)
 
-    private static readonly Color COL_BODY = new Color(0.08f, 0.10f, 0.16f);
-    private static readonly Color COL_TOP = new Color(0.11f, 0.14f, 0.22f);
+    private static readonly Color COL_BODY = new Color(0.04f, 0.04f, 0.05f);
+    private static readonly Color COL_TOP = new Color(0.06f, 0.06f, 0.08f);
 
     private Dictionary<char, KeyTile3D> tiles = new Dictionary<char, KeyTile3D>();
     private KeyTile3D currentTile = null;
@@ -76,36 +76,39 @@ public class KeyboardMap : MonoBehaviour
         new Vector3(0, 0.01f, 0), new Vector3(s, 0.02f, s), COL_BODY);
 
         // 2. TOP
-        float topH = 0.04f, inset = 0.04f;
+        float topH = 0.1f, inset = 0.8f;
         MakeCube(go.transform, "Top",
             new Vector3(0, h + topH / 2f, 0),
             new Vector3(s - inset, topH, s - inset), COL_TOP);
 
         // 3. VIỀN NEON 4 mặt bên
+        Color borderColor = new Color(0.85f, 0.65f, 0.1f);
         float ew = 0.06f, eh = h * 0.65f, ey = h / 2f, reach = s / 2f;
-        MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), neonColor);
-        MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), neonColor);
-        MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), neonColor);
-        MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), neonColor);
+        MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), borderColor);
+        MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), borderColor);
+        MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
+        MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
 
         // 4. VIỀN NEON mặt trên
         float bt = 0.05f, by = h + topH + 0.002f;
         float bHalf = s / 2f - bt / 2f - inset / 2f;
-        MakeNeon(go.transform, new Vector3(0, by, bHalf), new Vector3(s * 0.68f, bt * 0.25f, bt), neonColor);
-        MakeNeon(go.transform, new Vector3(0, by, -bHalf), new Vector3(s * 0.68f, bt * 0.25f, bt), neonColor);
-        MakeNeon(go.transform, new Vector3(-bHalf, by, 0), new Vector3(bt, bt * 0.25f, s * 0.68f), neonColor);
-        MakeNeon(go.transform, new Vector3(bHalf, by, 0), new Vector3(bt, bt * 0.25f, s * 0.68f), neonColor);
+        MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), borderColor);
+        MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), borderColor);
+        MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
+        MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
 
         // 5. CHỮ CÁI
         var lbl = new GameObject("Label");
         lbl.transform.SetParent(go.transform);
         lbl.transform.localPosition = new Vector3(0, h + topH + 0.01f, 0);
         lbl.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-        lbl.transform.localScale = Vector3.one * 0.28f; // nhỏ hơn (was 0.40)
+        lbl.transform.localScale = Vector3.one * 0.28f;
         var tm = lbl.AddComponent<TextMesh>();
         tm.text = letter.ToString(); tm.fontSize = 56; tm.fontStyle = FontStyle.Bold;
         tm.color = neonColor; tm.anchor = TextAnchor.MiddleCenter;
         tm.alignment = TextAlignment.Center;
+        tm.characterSize = 0.5f;
+        tm.color = neonColor * 3.5f;
 
 
         // 6. COLLIDER
