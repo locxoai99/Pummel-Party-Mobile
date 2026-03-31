@@ -46,6 +46,8 @@ public class PlayerController : MonoBehaviour
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
         if (anim != null) anim.applyRootMotion = false;
+        foreach (var r in GetComponentsInChildren<Renderer>())
+            r.material.renderQueue = 3000;
     }
 
     void Update()

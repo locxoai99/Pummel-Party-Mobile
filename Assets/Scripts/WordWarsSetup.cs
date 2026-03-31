@@ -36,6 +36,7 @@ public static class WordWarsSetup
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/GameScene.unity");
         AssetDatabase.Refresh();
         Selection.activeGameObject = player;
+        AnimatorSetup.CreateAnimator();
         Debug.Log("✅ DONE! Chữ trên đầu đổi màu khi select — E chọn chữ");
     }
 

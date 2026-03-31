@@ -33,8 +33,16 @@ public class WordWarsHUD : MonoBehaviour
             announcerPanel = MakePanel("AnnPanel",
                 new Vector2(0.1f, 0.6f), new Vector2(0.9f, 0.76f), DARK_BG);
 
-            // Neon border bottom
-            MakePanel("AnnBorder", new Vector2(0.1f, 0.595f), new Vector2(0.9f, 0.603f), NEON_BLUE);
+            // Neon border — CHILD của AnnPanel → ẩn cùng lúc
+            var border = new GameObject("AnnBorder");
+            border.transform.SetParent(announcerPanel.transform, false);
+            border.AddComponent<Image>().color = NEON_BLUE;
+            var bRT = border.GetComponent<RectTransform>();
+            bRT.anchorMin = new Vector2(0, 0);
+            bRT.anchorMax = new Vector2(1, 0);
+            bRT.pivot = new Vector2(0.5f, 1);
+            bRT.anchoredPosition = Vector2.zero;
+            bRT.sizeDelta = new Vector2(0, 3);
 
             var go = new GameObject("AnnText");
             go.transform.SetParent(announcerPanel.transform, false);

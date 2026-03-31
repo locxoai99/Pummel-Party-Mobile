@@ -7,7 +7,7 @@ public class KeyboardMap : MonoBehaviour
 
     [Header("Tile Settings")]
     public float tileSize = 1.8f;   // nhỏ hơn (was 2.8)
-    public float tileHeight = 0.25f;  // thấp hơn (was 0.35)
+    public float tileHeight = 0.02f;  // thấp hơn (was 0.35)
     public float tileSpacing = 0.6f;   // khoảng cách hẹp hơn (was 1.4)
 
     private static readonly Color COL_BODY = new Color(0.08f, 0.10f, 0.16f);
@@ -73,7 +73,7 @@ public class KeyboardMap : MonoBehaviour
 
         // 1. BODY
         var body = MakeCube(go.transform, "Body",
-            new Vector3(0, h / 2f, 0), new Vector3(s, h, s), COL_BODY);
+        new Vector3(0, 0.01f, 0), new Vector3(s, 0.02f, s), COL_BODY);
 
         // 2. TOP
         float topH = 0.04f, inset = 0.04f;
@@ -106,6 +106,7 @@ public class KeyboardMap : MonoBehaviour
         tm.text = letter.ToString(); tm.fontSize = 56; tm.fontStyle = FontStyle.Bold;
         tm.color = neonColor; tm.anchor = TextAnchor.MiddleCenter;
         tm.alignment = TextAlignment.Center;
+
 
         // 6. COLLIDER
         var col = go.AddComponent<BoxCollider>();
