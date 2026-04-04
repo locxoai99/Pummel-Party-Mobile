@@ -17,7 +17,43 @@ public class KeyTile3D : MonoBehaviour
 
     private Vector3 originalScale;
     private Vector3 originalPos;
+    private float swingTimer = 0f;
+    private bool isSwinging = false;
+    private float swingDuration = 1.5f;
+    private float swingAngle = 12f;
+    void Update()
+    {
+        if (isSwinging)
+        {
+            swingTimer += Time.deltaTime;
+            float t = swingTimer / swingDuration;
+            float angle = swingAngle * Mathf.Sin(t * Mathf.PI * 4f) * (1f - t);
+            transform.localRotation = Quaternion.Euler(0, 0, angle);
+            if (t >= 1f)
+            {
+                isSwinging = false;
+                transform.localRotation = Quaternion.identity;
+            }
+        }
+    }
 
+    public void StartSwing()
+    {
+        isSwinging = true;
+        swingTimer = 0f;
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        KeyboardMap.Instance?.OnPlayerEnterTile(this);
+        StartSwing();
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        KeyboardMap.Instance?.OnPlayerExitTile(this);
+    }
     void Awake()
     {
         originalScale = transform.localScale;

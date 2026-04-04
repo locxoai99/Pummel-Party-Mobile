@@ -8,7 +8,7 @@ public class KeyboardMap : MonoBehaviour
     [Header("Tile Settings")]
     public float tileSize = 1.8f;
     public float tileHeight = 0.02f;
-    public float tileSpacing = 0.6f;
+    public float tileSpacing = 0.3f;
 
     private static readonly Color COL_BODY = new Color(0.04f, 0.04f, 0.05f);
     private static readonly Color COL_TOP = new Color(0.16f, 0.18f, 0.23f);
@@ -78,83 +78,44 @@ public class KeyboardMap : MonoBehaviour
 
         var go = new GameObject("Key_" + letter);
         go.transform.SetParent(transform);
-        go.transform.localPosition = localPos;
+        go.transform.localPosition = localPos + new Vector3(0f, 2.8f, 0f);
         go.transform.localRotation = Quaternion.identity;
         go.transform.localScale = Vector3.one;
+        // 1. LỒNG ĐÈN
+        GameObject lanternGO = null;
+#if UNITY_EDITOR
+var lanternPrefab = Resources.Load<GameObject>("lantern_hoian");
+if (lanternPrefab != null)
+    lanternGO = Instantiate(lanternPrefab);
+#endif
+        if (lanternGO != null)
+        {
+            lanternGO.name = "Lantern";
+            lanternGO.transform.SetParent(go.transform);
+            lanternGO.transform.localPosition = Vector3.zero;
+            lanternGO.transform.localScale = Vector3.one * 57f;
+            lanternGO.transform.localRotation = Quaternion.identity;
+            foreach (var r in lanternGO.GetComponentsInChildren<Renderer>())
+            {
+                var mat = new Material(Shader.Find("Standard"));
+                mat.color = neonColor * 0.6f;
+                mat.EnableKeyword("_EMISSION");
+                mat.SetColor("_EmissionColor", neonColor * 1.2f);
+                r.material = mat;
+            }
+            foreach (var c in lanternGO.GetComponentsInChildren<Collider>())
+                c.enabled = false;
+        }
+        var lanternMat = lanternGO != null ? lanternGO.GetComponentInChildren<Renderer>()?.material : null;
 
-        // 1. BODY
-        var body = MakeCube(
-            go.transform,
-            "Body",
-            new Vector3(0, 0.01f, 0),
-            new Vector3(s, 0.02f, s),
-            COL_BODY
-        );
 
-        // 2. TOP
-        float topH = 0.16f;
-        float inset = 0.8f;
-
-        MakeCube(
-            go.transform,
-            "Top",
-            new Vector3(0, h + topH / 2f, 0),
-            new Vector3(s - inset, topH, s - inset),
-            COL_TOP
-        );
-
-        // 2.5 INNER FRAME
-        MakeCube(
-            go.transform,
-            "InnerFrame",
-            new Vector3(0, h + 0.005f, 0),
-            new Vector3(s - 0.35f, 0.01f, s - 0.35f),
-            new Color(0.08f, 0.10f, 0.12f)
-        );
-
-        // 2.6 CORE GLOW
-        float coreSize = s * 0.34f;
-
-        var core = MakeCube(
-            go.transform,
-            "CoreGlow",
-            new Vector3(0, h + topH + 0.015f, 0),
-            new Vector3(coreSize, 0.02f, coreSize),
-            new Color(0.70f, 1.00f, 1.00f)
-        );
-
-        var coreMat = core.GetComponent<Renderer>().material;
-        coreMat.EnableKeyword("_EMISSION");
-        coreMat.SetColor("_EmissionColor", new Color(0.70f, 1.00f, 1.00f) * 10f);
-
-        // 3. VIỀN NEON 4 mặt bên
-        Color borderColor = new Color(0.85f, 0.65f, 0.1f);
-        float ew = 0.06f;
-        float eh = h * 0.65f;
-        float ey = h / 2f;
-        float reach = s / 2f;
-
-        MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), borderColor);
-        MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), borderColor);
-        MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
-        MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
-
-        // 4. VIỀN NEON mặt trên
-        float bt = 0.05f;
-        float by = h + topH + 0.002f;
-        float bHalf = (s - inset) / 2f - bt / 2f;
-
-        MakeNeon(go.transform, new Vector3(0, by, bHalf), new Vector3(s * 0.38f, 0.02f, bt), borderColor);
-        MakeNeon(go.transform, new Vector3(0, by, -bHalf), new Vector3(s * 0.38f, 0.02f, bt), borderColor);
-        MakeNeon(go.transform, new Vector3(-bHalf, by, 0), new Vector3(bt, 0.02f, s * 0.38f), borderColor);
-        MakeNeon(go.transform, new Vector3(bHalf, by, 0), new Vector3(bt, 0.02f, s * 0.38f), borderColor);
 
         // 5. CHỮ CÁI
         var lbl = new GameObject("Label");
         lbl.transform.SetParent(go.transform);
-        lbl.transform.localPosition = new Vector3(0, h + topH + 0.03f, 0);
-        lbl.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-        lbl.transform.localScale = Vector3.one * 0.28f;
+        lbl.transform.localPosition = new Vector3(0, 0.11f, 0.04f);
+        lbl.transform.localRotation = Quaternion.Euler(44f, 0f, 0f);
+        lbl.transform.localScale = Vector3.one * 0.34f;
 
         var tm = lbl.AddComponent<TextMesh>();
         tm.text = letter.ToString();
@@ -163,35 +124,28 @@ public class KeyboardMap : MonoBehaviour
         tm.anchor = TextAnchor.MiddleCenter;
         tm.alignment = TextAlignment.Center;
         tm.characterSize = 0.5f;
-        tm.color = neonColor * 8f;
+        tm.color = new Color(0.15f, 0.1f, 0.05f);
 
         // 6. COLLIDER
-        var col = go.AddComponent<BoxCollider>();
-        col.isTrigger = false;
-        col.center = new Vector3(0, h / 2f, 0);
-        col.size = new Vector3(s * 0.88f, h, s * 0.88f);
+        var col = go.AddComponent<SphereCollider>();
+        col.isTrigger = true;
+        col.radius = s * 0.45f;
+        col.center = Vector3.zero;
 
-        // 7. SLOPE 4 cạnh
-        float slopeW = 0.25f;
-        MakeSlope(go.transform, new Vector3(0, 0, -s / 2f), new Vector3(s, h, slopeW), -15f, true);
-        MakeSlope(go.transform, new Vector3(0, 0, s / 2f), new Vector3(s, h, slopeW), 15f, true);
-        MakeSlope(go.transform, new Vector3(-s / 2f, 0, 0), new Vector3(slopeW, h, s), -15f, false);
-        MakeSlope(go.transform, new Vector3(s / 2f, 0, 0), new Vector3(slopeW, h, s), 15f, false);
 
         // 8. TRIGGER detect player
         var trigGO = new GameObject("Trigger");
         trigGO.transform.SetParent(go.transform);
-        trigGO.transform.localPosition = new Vector3(0, h + 0.4f, 0);
-
-        var trig = trigGO.AddComponent<BoxCollider>();
+        trigGO.transform.localPosition = Vector3.zero;
+        var trig = trigGO.AddComponent<SphereCollider>();
         trig.isTrigger = true;
-        trig.size = new Vector3(s * 0.8f, 0.8f, s * 0.8f);
+        trig.radius = s * 0.5f;
 
         // 9. COMPONENT
         var kt = go.AddComponent<KeyTile3D>();
         kt.letter = letter;
         kt.neonColor = neonColor;
-        kt.baseMat = body.GetComponent<Renderer>().material;
+        kt.baseMat = lanternMat;
         kt.tileBase = COL_BODY;
 
         return kt;
