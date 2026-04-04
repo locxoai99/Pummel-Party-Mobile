@@ -68,31 +68,30 @@ public static class WordWarsSetup
     static void BuildArena()
     {
         // Sàn
-        C("Floor", V(0, -0.25f, 0), V(60, 0.5f, 60), H("0A0E17"));
-        C("SubFloor", V(0, -0.6f, 0), V(64, 0.2f, 64), H("050910"));
-
+        C("Floor", V(0, -0.25f, -1f), V(18, 0.5f, 14), H("0A0E17"));
+C("SubFloor", V(0, -0.6f, -1f), V(20, 0.2f, 16), H("050910"));
         // Tường
         Color wall = H("0D1320");
-        C("Wall_N", V(0, 3f,  29), V(60, 7f, 1), wall);
-        C("Wall_S", V(0, 3f, -29), V(60, 7f, 1), wall);
-        C("Wall_E", V(29, 3f, 0),  V(1, 7f, 60), wall);
-        C("Wall_W", V(-29, 3f, 0), V(1, 7f, 60), wall);
+        C("Wall_N", V(0, 3f,  6.7f), V(17, 7f, 1), wall);
+C("Wall_S", V(0, 3f, -7.44f), V(17, 7f, 1), wall);
+C("Wall_E", V(8.5f, 3f, -1.03f),  V(1, 7f, 13), wall);
+C("Wall_W", V(-8.5f, 3f, -0.03f), V(1, 7f, 13), wall);
 
         // Hazard stripe trên tường (cam neon)
         Color stripe = new Color(1f, 0.7f, 0f);
-        Emit(C("Stripe_N", V(0, 6.2f,  29), V(60, 0.3f, 0.45f), stripe), stripe, 1.8f);
-        Emit(C("Stripe_S", V(0, 6.2f, -29), V(60, 0.3f, 0.45f), stripe), stripe, 1.8f);
-        Emit(C("Stripe_E", V(29, 6.2f, 0),  V(0.45f, 0.3f, 60), stripe), stripe, 1.8f);
-        Emit(C("Stripe_W", V(-29, 6.2f, 0), V(0.45f, 0.3f, 60), stripe), stripe, 1.8f);
+        Emit(C("Stripe_N", V(0, 6.2f,  5.5f), V(17, 0.3f, 0.45f), stripe), stripe, 1.8f);
+Emit(C("Stripe_S", V(0, 6.2f, -7.2f), V(17, 0.3f, 0.45f), stripe), stripe, 1.8f);
+Emit(C("Stripe_E", V(8.5f, 6.2f, -1f),  V(0.45f, 0.3f, 13), stripe), stripe, 1.8f);
+Emit(C("Stripe_W", V(-8.5f, 6.2f, -1f), V(0.45f, 0.3f, 13), stripe), stripe, 1.8f);
 
         // KHÔNG CÓ ACCENT NEON (đã bỏ thanh xanh)
 
         // Grid sàn — mờ nhẹ
         Color grid = H("0D121C");
-        for (int i = -6; i <= 6; i++)
+        for (int i = -3; i <= 3; i++)
         {
-            C("GH" + i, V(i * 4.5f, -0.16f, 0), V(0.03f, 0.01f, 57), grid);
-            C("GV" + i, V(0, -0.16f, i * 4.5f), V(57, 0.01f, 0.03f), grid);
+            C("GH" + i, V(i * 4.5f, -0.16f, 0), V(0.03f, 0.01f, 26), grid);
+            C("GV" + i, V(0, -0.16f, i * 4.5f), V(20, 0.01f, 0.03f), grid);
         }
 
         // Respawn
@@ -203,7 +202,7 @@ static void EnsureVisualModel(GameObject playerRoot)
         cf.offset = new Vector3(0f, 16f, -14f);
         cf.smoothTime = 0.15f;
 
-        g.transform.position = player.transform.position + new Vector3(0f, 16f, 0f);
+        g.transform.position = player.transform.position + new Vector3(0f, 12.8f, 2f);
         g.transform.rotation = Quaternion.Euler(68f, 0f, 0f);
 
         return g;

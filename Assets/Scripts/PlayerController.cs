@@ -60,8 +60,14 @@ public class PlayerController : MonoBehaviour
         UpdateAnim();
     }
 
-    void FixedUpdate() { Move(); DoJump(); }
-
+    void FixedUpdate() { Move(); DoJump(); ClampPosition(); }
+    void ClampPosition()
+    {
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, -8f, 8f);
+        pos.z = Mathf.Clamp(pos.z, -6.7f, 5f);
+        transform.position = pos;
+    }
     void Move()
     {
         float h = (joystick != null) ? joystick.Horizontal : 0f;

@@ -6,12 +6,12 @@ public class KeyboardMap : MonoBehaviour
     public static KeyboardMap Instance { get; private set; }
 
     [Header("Tile Settings")]
-    public float tileSize = 1.8f;   // nhỏ hơn (was 2.8)
-    public float tileHeight = 0.02f;  // thấp hơn (was 0.35)
-    public float tileSpacing = 0.6f;   // khoảng cách hẹp hơn (was 1.4)
+    public float tileSize = 1.8f;
+    public float tileHeight = 0.02f;
+    public float tileSpacing = 0.6f;
 
     private static readonly Color COL_BODY = new Color(0.04f, 0.04f, 0.05f);
-    private static readonly Color COL_TOP = new Color(0.06f, 0.06f, 0.08f);
+    private static readonly Color COL_TOP = new Color(0.16f, 0.18f, 0.23f);
 
     private Dictionary<char, KeyTile3D> tiles = new Dictionary<char, KeyTile3D>();
     private KeyTile3D currentTile = null;
@@ -34,12 +34,21 @@ public class KeyboardMap : MonoBehaviour
         new Color(0.50f,0.88f,1f), new Color(1f,0.42f,0.78f),
     };
 
-    void Awake() { Instance = this; }
-    void Start() { BuildKeyboard(); }
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    void Start()
+    {
+        BuildKeyboard();
+    }
 
     public void BuildKeyboard()
     {
-        foreach (Transform child in transform) Destroy(child.gameObject);
+        foreach (Transform child in transform)
+            Destroy(child.gameObject);
+
         tiles.Clear();
 
         float step = tileSize + tileSpacing;
@@ -70,46 +79,91 @@ public class KeyboardMap : MonoBehaviour
         var go = new GameObject("Key_" + letter);
         go.transform.SetParent(transform);
         go.transform.localPosition = localPos;
+        go.transform.localRotation = Quaternion.identity;
+        go.transform.localScale = Vector3.one;
 
         // 1. BODY
-        var body = MakeCube(go.transform, "Body",
-        new Vector3(0, 0.01f, 0), new Vector3(s, 0.02f, s), COL_BODY);
+        var body = MakeCube(
+            go.transform,
+            "Body",
+            new Vector3(0, 0.01f, 0),
+            new Vector3(s, 0.02f, s),
+            COL_BODY
+        );
 
         // 2. TOP
-        float topH = 0.1f, inset = 0.8f;
-        MakeCube(go.transform, "Top",
+        float topH = 0.16f;
+        float inset = 0.8f;
+
+        MakeCube(
+            go.transform,
+            "Top",
             new Vector3(0, h + topH / 2f, 0),
-            new Vector3(s - inset, topH, s - inset), COL_TOP);
+            new Vector3(s - inset, topH, s - inset),
+            COL_TOP
+        );
+
+        // 2.5 INNER FRAME
+        MakeCube(
+            go.transform,
+            "InnerFrame",
+            new Vector3(0, h + 0.005f, 0),
+            new Vector3(s - 0.35f, 0.01f, s - 0.35f),
+            new Color(0.08f, 0.10f, 0.12f)
+        );
+
+        // 2.6 CORE GLOW
+        float coreSize = s * 0.34f;
+
+        var core = MakeCube(
+            go.transform,
+            "CoreGlow",
+            new Vector3(0, h + topH + 0.015f, 0),
+            new Vector3(coreSize, 0.02f, coreSize),
+            new Color(0.70f, 1.00f, 1.00f)
+        );
+
+        var coreMat = core.GetComponent<Renderer>().material;
+        coreMat.EnableKeyword("_EMISSION");
+        coreMat.SetColor("_EmissionColor", new Color(0.70f, 1.00f, 1.00f) * 10f);
 
         // 3. VIỀN NEON 4 mặt bên
         Color borderColor = new Color(0.85f, 0.65f, 0.1f);
-        float ew = 0.06f, eh = h * 0.65f, ey = h / 2f, reach = s / 2f;
+        float ew = 0.06f;
+        float eh = h * 0.65f;
+        float ey = h / 2f;
+        float reach = s / 2f;
+
         MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), borderColor);
         MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), borderColor);
         MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
         MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
 
         // 4. VIỀN NEON mặt trên
-        float bt = 0.05f, by = h + topH + 0.002f;
-        float bHalf = s / 2f - bt / 2f - inset / 2f;
-        MakeNeon(go.transform, new Vector3(0, ey, reach), new Vector3(s * 0.7f, eh, ew), borderColor);
-        MakeNeon(go.transform, new Vector3(0, ey, -reach), new Vector3(s * 0.7f, eh, ew), borderColor);
-        MakeNeon(go.transform, new Vector3(-reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
-        MakeNeon(go.transform, new Vector3(reach, ey, 0), new Vector3(ew, eh, s * 0.7f), borderColor);
+        float bt = 0.05f;
+        float by = h + topH + 0.002f;
+        float bHalf = (s - inset) / 2f - bt / 2f;
+
+        MakeNeon(go.transform, new Vector3(0, by, bHalf), new Vector3(s * 0.38f, 0.02f, bt), borderColor);
+        MakeNeon(go.transform, new Vector3(0, by, -bHalf), new Vector3(s * 0.38f, 0.02f, bt), borderColor);
+        MakeNeon(go.transform, new Vector3(-bHalf, by, 0), new Vector3(bt, 0.02f, s * 0.38f), borderColor);
+        MakeNeon(go.transform, new Vector3(bHalf, by, 0), new Vector3(bt, 0.02f, s * 0.38f), borderColor);
 
         // 5. CHỮ CÁI
         var lbl = new GameObject("Label");
         lbl.transform.SetParent(go.transform);
-        lbl.transform.localPosition = new Vector3(0, h + topH + 0.01f, 0);
+        lbl.transform.localPosition = new Vector3(0, h + topH + 0.03f, 0);
         lbl.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
         lbl.transform.localScale = Vector3.one * 0.28f;
+
         var tm = lbl.AddComponent<TextMesh>();
-        tm.text = letter.ToString(); tm.fontSize = 56; tm.fontStyle = FontStyle.Bold;
-        tm.color = neonColor; tm.anchor = TextAnchor.MiddleCenter;
+        tm.text = letter.ToString();
+        tm.fontSize = 56;
+        tm.fontStyle = FontStyle.Bold;
+        tm.anchor = TextAnchor.MiddleCenter;
         tm.alignment = TextAlignment.Center;
         tm.characterSize = 0.5f;
-        tm.color = neonColor * 3.5f;
-
+        tm.color = neonColor * 8f;
 
         // 6. COLLIDER
         var col = go.AddComponent<BoxCollider>();
@@ -117,7 +171,7 @@ public class KeyboardMap : MonoBehaviour
         col.center = new Vector3(0, h / 2f, 0);
         col.size = new Vector3(s * 0.88f, h, s * 0.88f);
 
-        // 7. SLOPE 4 cạnh (nhỏ hơn)
+        // 7. SLOPE 4 cạnh
         float slopeW = 0.25f;
         MakeSlope(go.transform, new Vector3(0, 0, -s / 2f), new Vector3(s, h, slopeW), -15f, true);
         MakeSlope(go.transform, new Vector3(0, 0, s / 2f), new Vector3(s, h, slopeW), 15f, true);
@@ -128,13 +182,15 @@ public class KeyboardMap : MonoBehaviour
         var trigGO = new GameObject("Trigger");
         trigGO.transform.SetParent(go.transform);
         trigGO.transform.localPosition = new Vector3(0, h + 0.4f, 0);
+
         var trig = trigGO.AddComponent<BoxCollider>();
         trig.isTrigger = true;
         trig.size = new Vector3(s * 0.8f, 0.8f, s * 0.8f);
 
-        // 9. Component
+        // 9. COMPONENT
         var kt = go.AddComponent<KeyTile3D>();
-        kt.letter = letter; kt.neonColor = neonColor;
+        kt.letter = letter;
+        kt.neonColor = neonColor;
         kt.baseMat = body.GetComponent<Renderer>().material;
         kt.tileBase = COL_BODY;
 
@@ -144,48 +200,86 @@ public class KeyboardMap : MonoBehaviour
     GameObject MakeCube(Transform parent, string name, Vector3 lp, Vector3 ls, Color col)
     {
         var g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        g.name = name; g.transform.SetParent(parent);
-        g.transform.localPosition = lp; g.transform.localScale = ls;
+        g.name = name;
+        g.transform.SetParent(parent);
+        g.transform.localPosition = lp;
+        g.transform.localScale = ls;
+        g.transform.localRotation = Quaternion.identity;
+
         Destroy(g.GetComponent<Collider>());
-        g.GetComponent<Renderer>().material = new Material(Shader.Find("Standard")) { color = col };
+
+        var mat = new Material(Shader.Find("Standard"));
+        mat.color = col;
+        g.GetComponent<Renderer>().material = mat;
+
         return g;
     }
 
     void MakeNeon(Transform parent, Vector3 lp, Vector3 ls, Color color)
     {
         var bar = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        bar.name = "Neon"; bar.transform.SetParent(parent);
-        bar.transform.localPosition = lp; bar.transform.localScale = ls;
+        bar.name = "Neon";
+        bar.transform.SetParent(parent);
+        bar.transform.localPosition = lp;
+        bar.transform.localScale = ls;
+        bar.transform.localRotation = Quaternion.identity;
+
         Destroy(bar.GetComponent<Collider>());
-        var mat = new Material(Shader.Find("Standard")) { color = color };
+
+        var mat = new Material(Shader.Find("Standard"));
+        mat.color = color;
         mat.EnableKeyword("_EMISSION");
-        mat.SetColor("_EmissionColor", color * 2.2f);
+        mat.SetColor("_EmissionColor", color * 8f);
+
         bar.GetComponent<Renderer>().material = mat;
     }
 
     void MakeSlope(Transform parent, Vector3 pos, Vector3 size, float angle, bool zAxis)
     {
-        var slope = new GameObject("Slope"); slope.transform.SetParent(parent);
+        var slope = new GameObject("Slope");
+        slope.transform.SetParent(parent);
         slope.transform.localPosition = pos;
         slope.transform.localRotation = zAxis
             ? Quaternion.Euler(angle, 0, 0)
             : Quaternion.Euler(0, 0, angle);
+
         var col = slope.AddComponent<BoxCollider>();
-        col.size = size; col.center = new Vector3(0, size.y * 0.3f, 0);
+        col.size = size;
+        col.center = new Vector3(0, size.y * 0.3f, 0);
     }
 
     public void OnPlayerEnterTile(KeyTile3D tile)
     {
-        if (currentTile != null && currentTile != tile) currentTile.SetHighlight(false);
-        currentTile = tile; currentTile.SetHighlight(true);
+        if (currentTile != null && currentTile != tile)
+            currentTile.SetHighlight(false);
+
+        currentTile = tile;
+        currentTile.SetHighlight(true);
     }
 
     public void OnPlayerExitTile(KeyTile3D tile)
     {
-        if (currentTile == tile) { currentTile.SetHighlight(false); currentTile = null; }
+        if (currentTile == tile)
+        {
+            currentTile.SetHighlight(false);
+            currentTile = null;
+        }
     }
 
-    public char? GetCurrentLetter() => currentTile?.letter;
-    public void SetTileCorrect(char c) { if (tiles.ContainsKey(c)) tiles[c].SetCorrect(); }
-    public void ResetAllTiles() { foreach (var t in tiles.Values) t.ResetState(); }
+    public char? GetCurrentLetter()
+    {
+        return currentTile?.letter;
+    }
+
+    public void SetTileCorrect(char c)
+    {
+        if (tiles.ContainsKey(c))
+            tiles[c].SetCorrect();
+    }
+
+    public void ResetAllTiles()
+    {
+        foreach (var t in tiles.Values)
+            t.ResetState();
+    }
 }

@@ -2,112 +2,166 @@ using UnityEngine;
 
 public class KeyTile3D : MonoBehaviour
 {
-    public char     letter;
-    public Color    neonColor;
-    public Color    tileBase;
+    public char letter;
+    public Color neonColor;
+
     public Material baseMat;
-
-    private bool  isHighlighted = false;
-    private bool  isCorrect     = false;
-    private float pulseTimer    = 0f;
-
-    private Vector3 originalPos;
-    private float   pressDepth   = 0.08f;
-    private float   currentPress = 0f;
-    private float   pressSpeed   = 12f;
+    public Color tileBase;
 
     private Renderer[] neonRenderers;
-    private float baseEmission = 2.2f;
 
-    void Start()
+    private bool isHighlighted = false;
+    private bool isCorrect = false;
+
+    private float baseEmission = 1.2f;
+
+    private Vector3 originalScale;
+    private Vector3 originalPos;
+
+    void Awake()
     {
+        originalScale = transform.localScale;
         originalPos = transform.localPosition;
+
+        // Lấy toàn bộ renderer có tên "Neon"
+        var rends = GetComponentsInChildren<Renderer>();
         var list = new System.Collections.Generic.List<Renderer>();
-        foreach (Transform child in transform)
+
+        foreach (var r in rends)
         {
-            if (child.name == "Neon")
-            {
-                var r = child.GetComponent<Renderer>();
-                if (r != null) list.Add(r);
-            }
+            if (r.gameObject.name.Contains("Neon"))
+                list.Add(r);
         }
+
         neonRenderers = list.ToArray();
-    }
-
-    void Update()
-    {
-        float targetPress = isHighlighted ? pressDepth : 0f;
-        currentPress = Mathf.Lerp(currentPress, targetPress, Time.deltaTime * pressSpeed);
-        transform.localPosition = originalPos + new Vector3(0, -currentPress, 0);
-
-        if (isHighlighted && !isCorrect)
-        {
-            pulseTimer += Time.deltaTime * 3.5f;
-            float pulse = 0.75f + Mathf.Sin(pulseTimer) * 0.25f;
-            if (baseMat)
-                baseMat.color = Color.Lerp(tileBase, new Color(0.20f, 0.28f, 0.48f), pulse);
-            SetNeonEmission(baseEmission + 2.5f * pulse);
-        }
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
-        KeyboardMap.Instance?.OnPlayerEnterTile(this);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
-        KeyboardMap.Instance?.OnPlayerExitTile(this);
-    }
-
-    public void SetHighlight(bool on)
-    {
-        isHighlighted = on; pulseTimer = 0f;
-        if (!on && !isCorrect)
-        {
-            if (baseMat) baseMat.color = tileBase;
-            SetNeonEmission(baseEmission);
-        }
-    }
-
-    public void SetCorrect()
-    {
-        isCorrect = true; isHighlighted = false;
-        Color green = new Color(0.15f, 1f, 0.35f);
-        if (baseMat) baseMat.color = new Color(0.06f, 0.32f, 0.10f);
-        foreach (var r in neonRenderers)
-        {
-            if (r == null) continue;
-            r.material.color = green;
-            r.material.SetColor("_EmissionColor", green * 2.5f);
-        }
-        var label = transform.Find("Label");
-        if (label != null) { var tm = label.GetComponent<TextMesh>(); if (tm) tm.color = green; }
-    }
-
-    public void ResetState()
-    {
-        isCorrect = false; isHighlighted = false;
-        if (baseMat) baseMat.color = tileBase;
-        foreach (var r in neonRenderers)
-        {
-            if (r == null) continue;
-            r.material.color = neonColor;
-            r.material.SetColor("_EmissionColor", neonColor * baseEmission);
-        }
-        var label = transform.Find("Label");
-        if (label != null) { var tm = label.GetComponent<TextMesh>(); if (tm) tm.color = neonColor; }
     }
 
     void SetNeonEmission(float intensity)
     {
-        if (neonRenderers == null) return;
         foreach (var r in neonRenderers)
         {
             if (r == null) continue;
-            r.material.SetColor("_EmissionColor", neonColor * intensity);
+
+            var mat = r.material;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", neonColor * intensity);
         }
+    }
+
+    // =============================
+    // 🔵 HIGHLIGHT (đứng lên ô)
+    // =============================
+    public void SetHighlight(bool on)
+    {
+        isHighlighted = on;
+
+        if (on && !isCorrect)
+        {
+            // sáng nhẹ body
+            if (baseMat)
+            {
+                baseMat.color = new Color(
+                    Mathf.Min(tileBase.r + 0.08f, 1f),
+                    Mathf.Min(tileBase.g + 0.08f, 1f),
+                    Mathf.Min(tileBase.b + 0.08f, 1f)
+                );
+            }
+
+            // tăng glow
+            SetNeonEmission(baseEmission * 1.8f);
+
+            // scale + nổi lên
+            transform.localScale = originalScale * 1.08f;
+            transform.localPosition = originalPos + new Vector3(0f, 0.025f, 0f);
+
+            // chữ sáng hơn
+            var label = transform.Find("Label");
+            if (label != null)
+            {
+                var tm = label.GetComponent<TextMesh>();
+                if (tm) tm.color = neonColor * 2f;
+            }
+        }
+        else if (!on && !isCorrect)
+        {
+            if (baseMat) baseMat.color = tileBase;
+
+            SetNeonEmission(baseEmission);
+
+            transform.localScale = originalScale;
+            transform.localPosition = originalPos;
+
+            var label = transform.Find("Label");
+            if (label != null)
+            {
+                var tm = label.GetComponent<TextMesh>();
+                if (tm) tm.color = neonColor;
+            }
+        }
+    }
+
+    // =============================
+    // 🟢 ĐÚNG
+    // =============================
+    public void SetCorrect()
+    {
+        isCorrect = true;
+        isHighlighted = false;
+
+        Color green = new Color(0.15f, 1f, 0.35f);
+
+        if (baseMat)
+            baseMat.color = new Color(0.06f, 0.32f, 0.10f);
+
+        foreach (var r in neonRenderers)
+        {
+            if (r == null) continue;
+
+            var mat = r.material;
+            mat.color = green;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", green * 4f);
+        }
+
+        var label = transform.Find("Label");
+        if (label != null)
+        {
+            var tm = label.GetComponent<TextMesh>();
+            if (tm) tm.color = green * 2f;
+        }
+
+        transform.localScale = originalScale * 1.12f;
+        transform.localPosition = originalPos + new Vector3(0f, 0.04f, 0f);
+    }
+
+    // =============================
+    // 🔄 RESET
+    // =============================
+    public void ResetState()
+    {
+        isCorrect = false;
+        isHighlighted = false;
+
+        if (baseMat) baseMat.color = tileBase;
+
+        foreach (var r in neonRenderers)
+        {
+            if (r == null) continue;
+
+            var mat = r.material;
+            mat.color = neonColor;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", neonColor * baseEmission);
+        }
+
+        var label = transform.Find("Label");
+        if (label != null)
+        {
+            var tm = label.GetComponent<TextMesh>();
+            if (tm) tm.color = neonColor;
+        }
+
+        transform.localScale = originalScale;
+        transform.localPosition = originalPos;
     }
 }
